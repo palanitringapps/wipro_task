@@ -7,20 +7,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.samplewp.api.OperationCallback
 import com.samplewp.base.BaseViewModel
+import com.samplewp.model.FeedsModel
 import com.samplewp.model.Row
-import com.samplewp.model.SampleResponse
 import com.samplewp.repo.FeedRepository
 
-open class FeedsViewModel(app: Application, val repository: FeedRepository) : BaseViewModel(app) {
+open class FeedsViewModel(app: Application, private val repository: FeedRepository) : BaseViewModel(app) {
 
 
-    var _sampleResponse = MutableLiveData<SampleResponse>().apply {
-        value = SampleResponse(
+    var _feedsModel = MutableLiveData<FeedsModel>().apply {
+        value = FeedsModel(
             ArrayList(), "data"
         )
     }
+    var filteredRows = ArrayList<Row>()
 
-    var response: LiveData<SampleResponse> = _sampleResponse
+    var feedResponse: LiveData<FeedsModel> = _feedsModel
 
     val _isViewLoading = MutableLiveData<Boolean>()
     val isViewLoading: LiveData<Boolean> = _isViewLoading
@@ -30,20 +31,17 @@ open class FeedsViewModel(app: Application, val repository: FeedRepository) : Ba
 
     private val _isEmptyList = MutableLiveData<Boolean>()
 
-    init {
-        refreshFeed()
-    }
+    fun getNewsFeeds(isPulltoRefresh: Boolean) {
 
-    fun refreshFeed() {
 
-        _isViewLoading.postValue(true)
+        _isViewLoading.postValue(!isPulltoRefresh)
 
         repository.getFeeds(object : OperationCallback {
             override fun onSuccess(obj: Any?) {
 
                 _isViewLoading.postValue(false)
 
-                if (obj != null && obj is SampleResponse) _sampleResponse.value = obj
+                if (obj != null && obj is FeedsModel) _feedsModel.value = obj
                 else {
                     _isEmptyList.postValue(true)
                 }
@@ -55,6 +53,14 @@ open class FeedsViewModel(app: Application, val repository: FeedRepository) : Ba
             }
 
         })
+    }
+
+    fun filterEmptyObjects() {
+        for (row in _feedsModel.value!!.rows) {
+            if (!(row.description.isNullOrBlank() && row.imageHref.isNullOrBlank() && row.title.isNullOrBlank())) {
+                filteredRows.add(row)
+            }
+        }
     }
 
     class FeedsViewModelFactory(private var app: Application, private var repo: FeedRepository) :

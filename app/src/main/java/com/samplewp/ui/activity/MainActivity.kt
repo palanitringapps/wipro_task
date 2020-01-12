@@ -1,7 +1,7 @@
 package com.samplewp.ui.activity
 
+
 import android.os.Bundle
-import android.widget.Toast
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -13,6 +13,7 @@ import com.samplewp.ui.adapter.FeedAdapter
 import com.samplewp.viewmodel.FeedsViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
+
 class MainActivity : BaseActivity<ViewDataBinding>() {
     private lateinit var viewModel: FeedsViewModel
     private lateinit var feedAdapter: FeedAdapter
@@ -23,16 +24,29 @@ class MainActivity : BaseActivity<ViewDataBinding>() {
 
         setupViewModel()
 
-        viewModel._sampleResponse.observe(this, Observer { setAdapter() })
+        viewModel.getNewsFeeds(false)
+        viewModel._feedsModel.observe(this, Observer {
+            viewModel.filterEmptyObjects()
+            setAdapter()
+        })
+
+
+        viewModel._isViewLoading.observe(this, Observer {
+            when (it) {
+                true -> showProgress()
+                false -> hideProgress()
+            }
+        })
 
         viewModel._onMessageError.observe(
             this,
             Observer {
-                Toast.makeText(this, "Network error please try again", Toast.LENGTH_SHORT).show()
+                showSnackBar("Network error please try again")
+                sr_pull.isRefreshing = false
             })
         sr_pull.setOnRefreshListener {
             sr_pull.isRefreshing = true
-            viewModel.refreshFeed()
+            viewModel.getNewsFeeds(true)
         }
     }
 
@@ -50,12 +64,11 @@ class MainActivity : BaseActivity<ViewDataBinding>() {
     private fun setAdapter() {
         if (sr_pull.isRefreshing) {
             sr_pull.isRefreshing = false
-            feedAdapter.clear()
-            feedAdapter.addAll(viewModel._sampleResponse.value!!)
+            feedAdapter.addAll(viewModel.filteredRows)
             return
         }
-        supportActionBar?.title = viewModel._sampleResponse.value?.title
-        feedAdapter = FeedAdapter(viewModel._sampleResponse.value!!)
+        supportActionBar?.title = viewModel._feedsModel.value?.title
+        feedAdapter = FeedAdapter(viewModel.filteredRows)
         rv_feed_list.layoutManager = LinearLayoutManager(this)
         rv_feed_list.adapter = feedAdapter
     }

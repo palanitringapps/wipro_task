@@ -1,29 +1,28 @@
 package com.samplewp.repo
 
 import com.samplewp.api.ApiClient
-import com.samplewp.api.FeedResponse
 import com.samplewp.api.OperationCallback
-import com.samplewp.model.SampleResponse
+import com.samplewp.model.FeedsModel
 import retrofit2.Call
 import retrofit2.Callback
 
 open class FeedRepository :  DataSource {
 
 
-    private var call: Call<SampleResponse>? = null
+    private var call: Call<FeedsModel>? = null
 
     override fun getFeeds(callback: OperationCallback) {
         call = ApiClient.build()?.getFeeds()
 
 
-        call?.enqueue(object : Callback<SampleResponse> {
-            override fun onFailure(call: Call<SampleResponse>, t: Throwable) {
+        call?.enqueue(object : Callback<FeedsModel> {
+            override fun onFailure(call: Call<FeedsModel>, t: Throwable) {
                 callback.onError(t.message)
             }
 
             override fun onResponse(
-                call: Call<SampleResponse>,
-                response: retrofit2.Response<SampleResponse>
+                call: Call<FeedsModel>,
+                response: retrofit2.Response<FeedsModel>
             ) {
                 response?.body()?.let {
                     if (response.isSuccessful ) {
@@ -37,8 +36,6 @@ open class FeedRepository :  DataSource {
     }
 
     override fun cancel() {
-        call?.let {
-            it.cancel()
-        }
+        call?.cancel()
     }
 }

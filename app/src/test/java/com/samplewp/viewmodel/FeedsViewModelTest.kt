@@ -6,7 +6,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import com.samplewp.api.OperationCallback
 import com.samplewp.model.Row
-import com.samplewp.model.SampleResponse
+import com.samplewp.model.FeedsModel
 import com.samplewp.repo.FeedRepository
 import org.junit.Assert
 import org.junit.Before
@@ -34,11 +34,11 @@ class FeedsViewModelTest {
     private lateinit var isViewLoadingObserver: Observer<Boolean>
     private lateinit var onMessageErrorObserver: Observer<Any>
     private lateinit var emptyListObserver: Observer<Boolean>
-    private lateinit var sampleResponseObserver: Observer<SampleResponse>
+    private lateinit var sampleResponseObserver: Observer<FeedsModel>
     private lateinit var row: ArrayList<Row>
 
-    private lateinit var feedEmptyList: SampleResponse
-    private lateinit var feedList: SampleResponse
+    private lateinit var feedEmptyList: FeedsModel
+    private lateinit var feedList: FeedsModel
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
@@ -49,7 +49,7 @@ class FeedsViewModelTest {
         `when`<Context>(context.applicationContext).thenReturn(context)
 
         viewModel = FeedsViewModel(context, repository)
-        feedEmptyList = SampleResponse(ArrayList(), "demo")
+        feedEmptyList = FeedsModel(ArrayList(), "demo")
 
         mockData()
         setupObservers()
@@ -60,14 +60,14 @@ class FeedsViewModelTest {
 
         with(viewModel) {
             isViewLoading.observeForever(isViewLoadingObserver)
-            response.observeForever(sampleResponseObserver)
+            feedResponse.observeForever(sampleResponseObserver)
         }
-
+        viewModel.getNewsFeeds(false)
         verify(repository, times(1)).getFeeds(capture(operationCallbackCaptor))
         operationCallbackCaptor.value.onSuccess(feedList)
 
         Assert.assertNotNull(viewModel.isViewLoading.value)
-        Assert.assertTrue(viewModel.response.value?.rows?.size == 3)
+        Assert.assertEquals(viewModel.feedResponse.value?.rows?.size, 3)
     }
 
     @Test
@@ -76,17 +76,18 @@ class FeedsViewModelTest {
             isViewLoading.observeForever(isViewLoadingObserver)
             onMessageError.observeForever(onMessageErrorObserver)
         }
+        viewModel.getNewsFeeds(false)
         verify(repository, times(1)).getFeeds(capture(operationCallbackCaptor))
         operationCallbackCaptor.value.onError("Response error")
         Assert.assertNotNull(viewModel.isViewLoading.value)
-        Assert.assertNotNull(viewModel.onMessageError.value)
+        Assert.assertTrue(viewModel.onMessageError.value.toString().equals("Response error"))
     }
 
     private fun setupObservers() {
         isViewLoadingObserver = mock(Observer::class.java) as Observer<Boolean>
         onMessageErrorObserver = mock(Observer::class.java) as Observer<Any>
         emptyListObserver = mock(Observer::class.java) as Observer<Boolean>
-        sampleResponseObserver = mock(Observer::class.java) as Observer<SampleResponse>
+        sampleResponseObserver = mock(Observer::class.java) as Observer<FeedsModel>
     }
 
 
@@ -115,7 +116,7 @@ class FeedsViewModelTest {
                 "mock"
             )
         )
-        feedList = SampleResponse(row, "Sample title")
+        feedList = FeedsModel(row, "Sample title")
     }
 
 }
