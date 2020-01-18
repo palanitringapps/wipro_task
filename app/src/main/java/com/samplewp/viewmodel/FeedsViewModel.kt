@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.samplewp.api.OperationCallback
 import com.samplewp.base.BaseViewModel
 import com.samplewp.model.FeedsModel
-import com.samplewp.model.Row
 import com.samplewp.repo.FeedRepository
 
 open class FeedsViewModel(app: Application, private val repository: FeedRepository) : BaseViewModel(app) {
@@ -19,7 +18,6 @@ open class FeedsViewModel(app: Application, private val repository: FeedReposito
             ArrayList(), "data"
         )
     }
-    var filteredRows = ArrayList<Row>()
 
     var feedResponse: LiveData<FeedsModel> = _feedsModel
 
@@ -53,14 +51,6 @@ open class FeedsViewModel(app: Application, private val repository: FeedReposito
             }
 
         })
-    }
-
-    fun filterEmptyObjects() {
-        for (row in _feedsModel.value!!.rows) {
-            if (!(row.description.isNullOrBlank() && row.imageHref.isNullOrBlank() && row.title.isNullOrBlank())) {
-                filteredRows.add(row)
-            }
-        }
     }
 
     class FeedsViewModelFactory(private var app: Application, private var repo: FeedRepository) :

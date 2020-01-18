@@ -9,13 +9,9 @@ import com.samplewp.base.BaseViewHolder
 import com.samplewp.databinding.AdapterFeedItemBinding
 import com.samplewp.model.Row
 
-class FeedAdapter(rows: ArrayList<Row>) :
+class FeedAdapter:
     RecyclerView.Adapter<FeedViewHolder>() {
-    var feedRow: ArrayList<Row>? = null
-
-    init {
-        feedRow = rows
-    }
+    var feedRow: List<Row> = emptyList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FeedViewHolder {
         return FeedViewHolder(
@@ -37,8 +33,10 @@ class FeedAdapter(rows: ArrayList<Row>) :
 
 
     fun addAll(rows: ArrayList<Row>) {
-        feedRow = rows
-        notifyDataSetChanged()
+        if (rows !== feedRow) {
+            feedRow = rows
+            notifyDataSetChanged()
+        }
     }
 }
 

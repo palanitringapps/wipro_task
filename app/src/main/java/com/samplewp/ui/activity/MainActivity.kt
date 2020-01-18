@@ -25,9 +25,10 @@ class MainActivity : BaseActivity<ViewDataBinding>() {
         setupViewModel()
 
         viewModel.getNewsFeeds(false)
+
+        setAdapter()
         viewModel._feedsModel.observe(this, Observer {
-            viewModel.filterEmptyObjects()
-            setAdapter()
+            setFeedsData()
         })
 
 
@@ -61,14 +62,14 @@ class MainActivity : BaseActivity<ViewDataBinding>() {
     }
 
 
+    private fun setFeedsData() {
+        sr_pull.isRefreshing = false
+        feedAdapter.addAll(viewModel.feedResponse.value!!.rows)
+    }
+
     private fun setAdapter() {
-        if (sr_pull.isRefreshing) {
-            sr_pull.isRefreshing = false
-            feedAdapter.addAll(viewModel.filteredRows)
-            return
-        }
         supportActionBar?.title = viewModel._feedsModel.value?.title
-        feedAdapter = FeedAdapter(viewModel.filteredRows)
+        feedAdapter = FeedAdapter()
         rv_feed_list.layoutManager = LinearLayoutManager(this)
         rv_feed_list.adapter = feedAdapter
     }
