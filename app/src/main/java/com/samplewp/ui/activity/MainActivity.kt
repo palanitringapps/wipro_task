@@ -65,10 +65,10 @@ class MainActivity : BaseActivity<ViewDataBinding>() {
     private fun setFeedsData() {
         sr_pull.isRefreshing = false
         feedAdapter.addAll(viewModel.feedResponse.value!!.rows)
+        supportActionBar?.title = viewModel._feedsModel.value?.title
     }
 
     private fun setAdapter() {
-        supportActionBar?.title = viewModel._feedsModel.value?.title
         feedAdapter = FeedAdapter()
         rv_feed_list.layoutManager = LinearLayoutManager(this)
         rv_feed_list.adapter = feedAdapter
