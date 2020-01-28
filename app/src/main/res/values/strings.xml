@@ -2,4 +2,5 @@
     <string name="app_name">SampleWp</string>
     <string name="ok">Ok</string>
     <string name="loading">Loading...</string>
+    <string name="test">Testing the git author name</string>
 </resources>
